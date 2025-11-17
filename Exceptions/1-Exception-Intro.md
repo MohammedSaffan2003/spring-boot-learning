@@ -81,3 +81,45 @@ public class GlobalExceptionHandler {
 * Keeps your API **clean, consistent, and professional**
 
 ---
+ **Flow diagram** for how validation and exception handling works in Spring Boot:
+
+```
+Client sends HTTP POST /users
+      |
+      v
+Controller receives @RequestBody UserRequestDTO with @Valid
+      |
+      v
+Validation occurs automatically (annotations like @NotEmpty, @Email)
+      |
+      v
+If validation fails → Spring throws MethodArgumentNotValidException
+      |
+      v
+GlobalExceptionHandler (@ControllerAdvice) catches the exception (ex)
+      |
+      v
+Extract field errors:
+ex.getBindingResult().getFieldErrors() → Map<field, message>
+      |
+      v
+Return ResponseEntity<Map<String, String>>(errors, HttpStatus.BAD_REQUEST)
+      |
+      v
+Client receives JSON response:
+{
+  "password": "Password must be at least 6 characters",
+  "email": "Email should be valid"
+}
+```
+
+---
+
+### Key Points to Remember:
+
+1. **Validation happens automatically** before your service/controller logic runs.
+2. **`MethodArgumentNotValidException`** is the bridge from invalid input → your handler.
+3. **GlobalExceptionHandler** allows **centralized, clean JSON responses**.
+4. **HTTP Status** is independent of the body — you can set `BAD_REQUEST`, `NOT_FOUND`, etc.
+
+---
